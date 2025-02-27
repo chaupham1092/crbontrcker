@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plane } from "lucide-react";
+import { Plane, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,22 +11,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import EmissionsCard from "@/components/EmissionsCard";
-import { calculateFlightEmissions, FlightResponse } from "@/services/api";
+import { calculateFlightEmissions, FlightResponse, FlightRequest } from "@/services/api";
 
-const formSchema = z.object({
+// Flight form schema
+const flightFormSchema = z.object({
   origin: z.string().min(3, "Origin airport code must be at least 3 characters"),
   destination: z.string().min(3, "Destination airport code must be at least 3 characters"),
   numberOfPassengers: z.coerce.number().int().min(1, "At least 1 passenger is required"),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FlightFormValues = z.infer<typeof flightFormSchema>;
 
 const FlightEmissions = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FlightResponse | null>(null);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FlightFormValues>({
+    resolver: zodResolver(flightFormSchema),
     defaultValues: {
       origin: "",
       destination: "",
@@ -34,10 +35,17 @@ const FlightEmissions = () => {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: FlightFormValues) => {
     setLoading(true);
     try {
-      const data = await calculateFlightEmissions(values);
+      // Ensure all required fields are present for the API call
+      const flightRequest: FlightRequest = {
+        origin: values.origin,
+        destination: values.destination,
+        numberOfPassengers: values.numberOfPassengers
+      };
+      
+      const data = await calculateFlightEmissions(flightRequest);
       setResult(data);
       toast.success("Flight emissions calculated successfully");
     } catch (error) {
@@ -48,19 +56,16 @@ const FlightEmissions = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl">
-      <div className="text-center mb-12 animate-fadeIn">
-        <span className="inline-block px-3 py-1 text-xs font-medium bg-secondary text-primary rounded-full mb-4">
-          Flight Calculator
-        </span>
-        <h1 className="text-3xl md:text-4xl font-semibold mb-4">Flight Emissions Calculator</h1>
+    <div className="container mx-auto py-10 max-w-4xl">
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-bold mb-4">Flight Emissions Calculator</h1>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Calculate the carbon emissions of your flights by entering your origin and destination airport codes.
+          Calculate the carbon footprint of your flights by entering the airport codes below.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <Card className="animate-slideUp card-glass card-hover">
+        <Card>
           <CardHeader>
             <div className="flex items-center mb-2">
               <div className="p-2 bg-secondary rounded-md mr-3">
@@ -121,23 +126,22 @@ const FlightEmissions = () => {
                 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Calculating..." : "Calculate Emissions"}
+                  {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-        
+
         {result ? (
           <EmissionsCard
             title="Flight Emissions"
             emissions={result.emissions_kg_co2e}
             unit="kg CO₂e"
             distance={result.distance_km}
-            className="animate-slideUp"
-            style={{ animationDelay: "0.2s" }}
           />
         ) : (
-          <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 animate-slideUp" style={{ animationDelay: "0.2s" }}>
+          <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
             <div className="text-center p-8">
               <div className="mx-auto w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-4">
                 <Plane className="h-6 w-6 text-primary" />

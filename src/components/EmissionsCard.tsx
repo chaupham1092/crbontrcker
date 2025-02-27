@@ -23,6 +23,13 @@ const EmissionsCard = ({
   className,
   ...props
 }: EmissionsCardProps) => {
+  // Determine color based on emissions amount
+  const getEmissionsColor = () => {
+    if (emissions <= 50) return "text-green-600 dark:text-green-400";
+    if (emissions <= 200) return "text-yellow-600 dark:text-yellow-400";
+    return "text-red-600 dark:text-red-400";
+  };
+
   return (
     <Card className={`overflow-hidden card-glass card-hover animate-fadeIn ${className}`} {...props}>
       <div className="bg-primary h-2 w-full"></div>
@@ -34,7 +41,7 @@ const EmissionsCard = ({
           <h3 className="text-xl font-medium">{title}</h3>
           
           <div className="flex flex-col space-y-2">
-            <div className="text-4xl font-semibold text-primary">
+            <div className={`text-4xl font-semibold ${getEmissionsColor()}`}>
               {emissions.toLocaleString(undefined, { 
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2 

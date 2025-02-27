@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plane, Car, ArrowRight, Globe, Leaf, LineChart } from "lucide-react";
+import { Plane, CreditCard, ArrowRight, Globe, Leaf, LineChart, ShoppingCart, Receipt, DollarSign, MapPin, Tag } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -31,21 +31,50 @@ const flightFormSchema = z.object({
 
 // Transaction form schema
 const transactionFormSchema = z.object({
-  currencyISO: z.string().min(3, "Currency ISO is required"),
+  currencyISO: z.string().min(3, "Currency is required"),
   categoryType: z.string().min(1, "Category type is required"),
-  categoryValue: z.string().min(1, "Category value is required"),
+  categoryValue: z.string().min(1, "Category is required"),
   description: z.string().optional(),
   merchant: z.string().min(1, "Merchant name is required"),
-  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
+  price: z.coerce.number().min(0.01, "Amount must be greater than 0"),
   transactionId: z.string().default(() => `tx_${Date.now()}`),
   transactionDate: z.string().default(() => new Date().toISOString().split("T")[0]),
   userType: z.string().default("PERSONAL"),
-  geo: z.string().min(1, "Geography is required"),
+  geo: z.string().min(1, "Country is required"),
   group: z.string().optional(),
 });
 
 type FlightFormValues = z.infer<typeof flightFormSchema>;
 type TransactionFormValues = z.infer<typeof transactionFormSchema>;
+
+// Category mappings for better user experience
+const categoryMappings = {
+  "5411": {
+    name: "Grocery Stores",
+    group: "Food",
+    icon: <ShoppingCart className="h-4 w-4" />
+  },
+  "5812": {
+    name: "Restaurants & Dining",
+    group: "Food",
+    icon: <Receipt className="h-4 w-4" />
+  },
+  "5541": {
+    name: "Gas & Fuel",
+    group: "Transportation",
+    icon: <CreditCard className="h-4 w-4" />
+  },
+  "4111": {
+    name: "Public Transportation",
+    group: "Transportation",
+    icon: <CreditCard className="h-4 w-4" />
+  },
+  "5311": {
+    name: "Department Stores",
+    group: "Shopping",
+    icon: <ShoppingCart className="h-4 w-4" />
+  }
+};
 
 const CarbonCalculator = () => {
   const [activeTab, setActiveTab] = useState("flight");
@@ -128,7 +157,7 @@ const CarbonCalculator = () => {
       
       const data = await calculateTransactionEmissions(transactionRequest);
       setTransactionResult(data);
-      toast.success("Transaction emissions calculated successfully");
+      toast.success("Purchase emissions calculated successfully");
     } catch (error) {
       // Error is already handled in the API service
     } finally {
@@ -144,7 +173,7 @@ const CarbonCalculator = () => {
         </span>
         <h1 className="text-3xl md:text-4xl font-semibold mb-4">Carbon Emissions Calculator</h1>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Calculate the environmental impact of your flights and financial transactions with our precise emissions calculator.
+          Calculate the environmental impact of your flights and purchases with our precise emissions calculator.
         </p>
       </div>
 
@@ -155,8 +184,8 @@ const CarbonCalculator = () => {
             Flight Emissions
           </TabsTrigger>
           <TabsTrigger value="transaction" className="text-base py-3">
-            <Car className="h-4 w-4 mr-2" />
-            Transaction Emissions
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Purchase Emissions
           </TabsTrigger>
         </TabsList>
         
@@ -238,12 +267,12 @@ const CarbonCalculator = () => {
                 <CardHeader>
                   <div className="flex items-center mb-2">
                     <div className="p-2 bg-secondary rounded-md mr-3">
-                      <Car className="h-5 w-5 text-primary" />
+                      <ShoppingCart className="h-5 w-5 text-primary" />
                     </div>
-                    <CardTitle>Transaction Details</CardTitle>
+                    <CardTitle>Purchase Details</CardTitle>
                   </div>
                   <CardDescription>
-                    Enter your transaction information to calculate its carbon impact
+                    Enter your purchase information to calculate its carbon footprint
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -255,9 +284,12 @@ const CarbonCalculator = () => {
                           name="merchant"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Merchant</FormLabel>
+                              <FormLabel className="flex items-center gap-1.5">
+                                <Receipt className="h-3.5 w-3.5" />
+                                Store/Merchant
+                              </FormLabel>
                               <FormControl>
-                                <Input placeholder="Tesco" {...field} />
+                                <Input placeholder="Tesco, Amazon, Shell, etc." {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -269,7 +301,10 @@ const CarbonCalculator = () => {
                           name="price"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Amount</FormLabel>
+                              <FormLabel className="flex items-center gap-1.5">
+                                <DollarSign className="h-3.5 w-3.5" />
+                                Purchase Amount
+                              </FormLabel>
                               <FormControl>
                                 <Input type="number" step="0.01" {...field} />
                               </FormControl>
@@ -285,7 +320,10 @@ const CarbonCalculator = () => {
                           name="currencyISO"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Currency</FormLabel>
+                              <FormLabel className="flex items-center gap-1.5">
+                                <DollarSign className="h-3.5 w-3.5" />
+                                Currency
+                              </FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -310,7 +348,10 @@ const CarbonCalculator = () => {
                           name="geo"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Country</FormLabel>
+                              <FormLabel className="flex items-center gap-1.5">
+                                <MapPin className="h-3.5 w-3.5" />
+                                Country
+                              </FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -332,86 +373,36 @@ const CarbonCalculator = () => {
                         />
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={transactionForm.control}
-                          name="categoryType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Category Type</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select category type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="mcc">MCC (Merchant Category Code)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={transactionForm.control}
-                          name="categoryValue"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Category Value</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select category value" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="5411">5411 - Grocery Stores</SelectItem>
-                                  <SelectItem value="5812">5812 - Restaurants</SelectItem>
-                                  <SelectItem value="5541">5541 - Gas Stations</SelectItem>
-                                  <SelectItem value="4111">4111 - Transportation</SelectItem>
-                                  <SelectItem value="5311">5311 - Department Stores</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
                       <FormField
                         control={transactionForm.control}
-                        name="description"
+                        name="categoryValue"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Description (Optional)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Transaction description" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={transactionForm.control}
-                        name="group"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Category Group</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormLabel className="flex items-center gap-1.5">
+                              <Tag className="h-3.5 w-3.5" />
+                              Purchase Category
+                            </FormLabel>
+                            <Select onValueChange={(value) => {
+                              field.onChange(value);
+                              // Update the category group based on the selected category
+                              if (categoryMappings[value as keyof typeof categoryMappings]) {
+                                transactionForm.setValue('group', categoryMappings[value as keyof typeof categoryMappings].group);
+                              }
+                            }} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select category group" />
+                                  <SelectValue placeholder="Select purchase category" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="Food">Food</SelectItem>
-                                <SelectItem value="Transportation">Transportation</SelectItem>
-                                <SelectItem value="Shopping">Shopping</SelectItem>
-                                <SelectItem value="Utilities">Utilities</SelectItem>
-                                <SelectItem value="Entertainment">Entertainment</SelectItem>
+                                {Object.entries(categoryMappings).map(([key, { name, icon }]) => (
+                                  <SelectItem key={key} value={key} className="flex items-center">
+                                    <div className="flex items-center gap-2">
+                                      {icon}
+                                      <span>{name}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -419,8 +410,29 @@ const CarbonCalculator = () => {
                         )}
                       />
                       
+                      <FormField
+                        control={transactionForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-1.5">
+                              <Receipt className="h-3.5 w-3.5" />
+                              Description (Optional)
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="What did you purchase?" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Hidden fields - handled automatically */}
+                      <input type="hidden" {...transactionForm.register('categoryType')} value="mcc" />
+                      <input type="hidden" {...transactionForm.register('group')} />
+                      
                       <Button type="submit" className="w-full" disabled={transactionLoading}>
-                        {transactionLoading ? "Calculating..." : "Calculate Emissions"}
+                        {transactionLoading ? "Calculating..." : "Calculate Carbon Footprint"}
                         {!transactionLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                       </Button>
                     </form>
@@ -459,24 +471,70 @@ const CarbonCalculator = () => {
             
             <TabsContent value="transaction" className="mt-0">
               {transactionResult ? (
-                <EmissionsCard
-                  title={`${transactionResult.name} Emissions`}
-                  emissions={transactionResult.kg_of_CO2e_emissions}
-                  unit="kg CO₂e"
-                  similarTo={transactionResult.similar_to}
-                  disclaimer={transactionResult.disclaimer}
-                  className="animate-slideUp"
-                  style={{ animationDelay: "0.2s" }}
-                />
+                <Card className="animate-slideUp overflow-hidden" style={{ animationDelay: "0.2s" }}>
+                  <CardHeader className="bg-green-50 dark:bg-green-900/20 pb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Result</span>
+                        <CardTitle className="mt-2">
+                          Carbon Footprint
+                        </CardTitle>
+                        <CardDescription>
+                          Your purchase at <strong>{transactionForm.getValues('merchant') || 'this merchant'}</strong>
+                        </CardDescription>
+                      </div>
+                      
+                      <div className="flex items-center space-x-1 text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">
+                        <Leaf className="h-4 w-4" />
+                        <span className="text-xs font-medium">Impact Details</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center mb-8">
+                      <h3 className="text-4xl font-bold text-green-700 dark:text-green-500">
+                        {transactionResult.kg_of_CO2e_emissions.toFixed(2)}
+                        <span className="text-lg font-normal text-gray-500 dark:text-gray-400 ml-1">kg CO₂e</span>
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400 mt-2 text-center">
+                        Carbon footprint of your {transactionResult.name.toLowerCase()}
+                      </p>
+                    </div>
+                    
+                    {transactionResult.similar_to && transactionResult.similar_to.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+                          <LineChart className="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
+                          Equivalent Impact:
+                        </h4>
+                        <ul className="space-y-2 pl-6 text-gray-600 dark:text-gray-300">
+                          {transactionResult.similar_to.map((item, index) => (
+                            <li key={index} className="flex items-start">
+                              <span className="text-green-600 dark:text-green-400 mr-2">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {transactionResult.disclaimer && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md">
+                        <strong className="font-medium">Note:</strong> {transactionResult.disclaimer}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ) : (
                 <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 animate-slideUp" style={{ animationDelay: "0.2s" }}>
                   <div className="text-center p-8">
                     <div className="mx-auto w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-4">
-                      <Car className="h-6 w-6 text-primary" />
+                      <ShoppingCart className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="text-lg font-medium mb-2">Emissions Results</h3>
+                    <h3 className="text-lg font-medium mb-2">Carbon Footprint Results</h3>
                     <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                      Fill out the form and calculate to view your transaction's carbon impact.
+                      Fill out the form and calculate to view your purchase's carbon footprint.
                     </p>
                   </div>
                 </div>
@@ -518,7 +576,7 @@ const CarbonCalculator = () => {
                 </li>
                 <li className="flex">
                   <span className="mr-2">•</span>
-                  <span><strong>Transaction Emissions:</strong> Estimates the carbon impact of purchases based on merchant category, price, and location.</span>
+                  <span><strong>Purchase Emissions:</strong> Estimates the carbon impact of purchases based on merchant category, price, and location.</span>
                 </li>
               </ul>
               <p className="text-gray-600 dark:text-gray-300">
@@ -579,7 +637,7 @@ const CarbonCalculator = () => {
                 </li>
                 <li className="flex">
                   <span className="mr-2">•</span>
-                  <span><strong>Transaction Emissions:</strong> Calculated using environmentally-extended input-output (EEIO) models that map spending categories to emissions.</span>
+                  <span><strong>Purchase Emissions:</strong> Calculated using environmentally-extended input-output (EEIO) models that map spending categories to emissions.</span>
                 </li>
               </ul>
               <p className="text-gray-600 dark:text-gray-300 mt-4">

@@ -1,6 +1,5 @@
 
 import { Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -13,15 +12,6 @@ const Header = () => {
           <Globe className="h-6 w-6 text-primary animate-pulse" />
           <h1 className="text-xl font-medium">Carbon Balance</h1>
         </div>
-        
-        <a 
-          href="https://connectearth.com" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
-        >
-          Powered by Connect Earth
-        </a>
       </div>
     </header>
   );

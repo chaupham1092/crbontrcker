@@ -1,8 +1,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { HTMLAttributes } from "react";
 
-interface EmissionsCardProps {
+interface EmissionsCardProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
   emissions: number;
   unit: string;
@@ -20,9 +21,10 @@ const EmissionsCard = ({
   disclaimer,
   similarTo,
   className,
+  ...props
 }: EmissionsCardProps) => {
   return (
-    <Card className={`overflow-hidden card-glass card-hover animate-fadeIn ${className}`}>
+    <Card className={`overflow-hidden card-glass card-hover animate-fadeIn ${className}`} {...props}>
       <div className="bg-primary h-2 w-full"></div>
       <CardContent className="pt-6">
         <div className="flex flex-col space-y-4">

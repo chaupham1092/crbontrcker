@@ -11,15 +11,9 @@ const Footer = () => {
             <span className="text-sm">Carbon Balance © {new Date().getFullYear()}</span>
           </div>
           
-          <div className="flex space-x-8 text-sm text-gray-500 dark:text-gray-400">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-primary transition-colors">Contact</a>
+          <div className="text-xs text-gray-400 dark:text-gray-500">
+            <p>All calculations are for informational purposes only.</p>
           </div>
-        </div>
-        
-        <div className="mt-8 text-xs text-gray-400 dark:text-gray-500 text-center">
-          <p>Powered by Connect Earth API. All calculations are for informational purposes only.</p>
         </div>
       </div>
     </footer>
